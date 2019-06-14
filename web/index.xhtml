@@ -1,0 +1,322 @@
+<?xml version='1.0' encoding='UTF-8' ?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://xmlns.jcp.org/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:p="http://primefaces.org/ui">
+    <h:head>
+        <title>Parameter Data</title>
+    </h:head>
+    <h:body >
+        <h:form id="paraForm"  style="margin-top:50px;margin-left:50px;margin-right:50px">
+            <p:dataTable id="datas" var="data" value="#{dataMB.dataList}" widgetVar="dt"  rowKey="#{data.id}" editable="#{dataMB.isLogin==true}" editMode="cell"    paginator="true" rows="5" sortMode="multiple" 
+                         paginatorTemplate="{CurrentPageReport} {FirstPageLink} {PreviousPageLink} {PageLinks} {NextPageLink} {LastPageLink} {RowsPerPageDropdown}" rowsPerPageTemplate="5,10,20,30">
+                <f:facet name="header">
+                    <h:outputText value=" List of Parameter Values" style="font-size: 24px;color:royalblue"/>                                  
+                </f:facet>    
+
+                <f:facet name="header">
+                    <p:commandButton id="toggler" type="button" value="Choose Columns to View" style="float:left;color: blueviolet" icon="ui-icon-calculator" />
+                    <p:commandButton value="Add a Record"  style="float:left;color:blueviolet" oncomplete="PF('addDialog').show()"   disabled= "#{dataMB.isLogin==false}"/>
+                    <p:commandButton   value="Login" style="float:left;color: blueviolet" oncomplete="PF('logDialog').show()"/>      
+                    <h:commandButton value="Export to XLS"  style="float:right;color:blueviolet">                     
+                        <p:dataExporter type="xls" target="datas" fileName="parameters"/>
+                    </h:commandButton>
+                    <p:columnToggler datasource="datas" trigger="toggler">
+                        <p:ajax event="toggle" listener="#{dataMB.onToggle}"/>                 			 
+                    </p:columnToggler>  
+                </f:facet>
+
+                <p:ajax event="cellEdit" listener="#{dataMB.cellEdit}" update=":paraForm:datas"/>   
+
+                <p:column style="width:10px" exportable="false">
+                    <p:rowToggler> 
+                    </p:rowToggler>      
+                </p:column>
+
+                <p:column visible="#{dataMB.stateList[0]}" exportable="false">
+                    <f:facet name="header">
+                        <h:outputText value="Id"/>
+                    </f:facet>
+                    <h:outputText value="#{data.id}"  />        
+                </p:column>
+                <p:column sortBy="#{data.systemId.subdivisionId.name}" filterBy="#{data.systemId.subdivisionId.name}" filterMatchMode="contains"  visible="#{dataMB.stateList[1]}" style="width: 100px">
+                    <f:facet name="header">
+                        <h:outputText value="SubDivision"/>
+                    </f:facet>
+                    <h:outputText value="#{data.systemId.subdivisionId.name}"/>
+                </p:column>
+                <p:column  sortBy="#{data.systemId.name}" filterBy="#{data.systemId.name}"  filterMatchMode="contains" visible="#{dataMB.stateList[2]}" style="width: 80px">
+                    <f:facet name="header">
+                        <h:outputText value="System"/>
+                    </f:facet>
+                    <h:outputText value="#{data.systemId.name}"/>
+                </p:column>
+
+                <p:column visible="#{dataMB.stateList[3]}" style="width: 80px">
+                    <f:facet name="header">
+                        <h:outputText value="Parameter Name"/>
+                    </f:facet>
+                    <h:outputText value="#{data.parameterid.name}"/>               
+                </p:column>
+                <p:column visible="#{dataMB.stateList[4]}" style="width: 70px">
+                    <f:facet name="header">
+                        <h:outputText value="Attribute"/>
+                    </f:facet>
+                    <h:outputText value="#{data.attributeid.name}"/>               
+                </p:column>
+                <p:column visible="#{dataMB.stateList[5]}" style="width: 30px">
+                    <f:facet name="header">
+                        <h:outputText value="Unit"/>
+                    </f:facet>
+                    <h:outputText value="#{data.parameterid.unitid.name}"/>               
+                </p:column>
+                <p:column visible="#{dataMB.stateList[6]}" style="width: 70px">
+
+                    <f:facet name="header">
+                        <h:outputText value="Value"/>
+                    </f:facet>
+                    <p:cellEditor>
+                        <f:facet name="output">
+                            <h:outputText  value="#{data.value}"/>  
+                        </f:facet>                       
+                        <f:facet  name="input">
+                            <h:inputText  value="#{data.value}" style="color:red" />  
+                        </f:facet>
+                    </p:cellEditor> 
+                </p:column>      
+
+                <!-- image column-->
+                <p:column headerText="Image" visible="#{dataMB.stateList[7]}" exportable="false" style="width: 40px">                  
+                    <p:commandButton icon="fa fa-upload"   disabled="#{dataMB.isLogin==false}" >
+                        <p:ajax event="click" listener="#{dataMB.setSelect(data)}" oncomplete="PF('uploadImageDialog').show()" /> 
+                    </p:commandButton>
+                    <p:commandButton icon="fa fa-eye" >
+                        <p:ajax event="click" listener="#{valueImageMB.putImage(data)}"  update=":viewImageForm"  oncomplete="PF('viewImageDialog').show()" />                 
+                    </p:commandButton>
+                </p:column>
+
+                <p:column visible="#{dataMB.stateList[8]}" style="width: 80px">
+                    <f:facet name="header">
+                        <h:outputText value="Change Date"/>
+                    </f:facet>
+                    <h:outputText value="#{data.datemodified}"> 
+                        <f:convertDateTime timeZone="GMT+8" pattern="yyyy/MM/dd" locale="zh"/>
+                    </h:outputText>
+                </p:column>
+                <p:column visible="#{dataMB.stateList[9]}" style="width: 80px">
+                    <f:facet name="header">
+                        <h:outputText value="Comment"/>
+                    </f:facet>
+                    <h:outputText value="#{data.comment}"/>               
+                </p:column>
+                <p:column visible="#{dataMB.stateList[10]}" style="width: 80px">
+                    <f:facet name="header">
+                        <h:outputText value="Definition"/>
+                    </f:facet>
+                    <h:outputText value="#{data.parameterid.definition}"/>               
+                </p:column>
+                <p:column visible="#{dataMB.stateList[11]}" style="width: 80px">
+                    <f:facet name="header">
+                        <h:outputText value="Reference Title"/>
+                    </f:facet>
+                    <h:outputText value="#{data.parameterid.referenceid.title}"/>               
+                </p:column>
+
+                <p:column visible="#{dataMB.stateList[12]}" style="width: 80px">
+                    <f:facet name="header">
+                        <h:outputText value="Reference Author"/>
+                    </f:facet>
+                    <h:outputText value="#{data.parameterid.referenceid.author}"/>               
+                </p:column>
+                <p:column visible="#{dataMB.stateList[13]}" style="width: 80px">
+                    <f:facet name="header">
+                        <h:outputText value="Reference Publication"/>
+                    </f:facet>
+                    <h:outputText value="#{data.parameterid.referenceid.publication}"/>               
+                </p:column>
+                <p:column visible="#{dataMB.stateList[14]}" style="width: 80px">
+                    <f:facet name="header">
+                        <h:outputText value="Reference URL"/>
+                    </f:facet>
+                    <h:outputText value="#{data.parameterid.referenceid.url}"/>               
+                </p:column>
+                <p:column visible="#{dataMB.stateList[15]}" style="width: 80px">
+                    <f:facet name="header">
+                        <h:outputText value="Keyword"/>
+                    </f:facet>
+                    <h:outputText value="#{data.parameterid.referenceid.keywords}"/>               
+                </p:column>
+                <p:column visible="#{dataMB.stateList[16]}" style="width: 100px">
+                    <f:facet name="header">
+                        <h:outputText value="Attachment"/>
+                    </f:facet>      
+                    
+                   
+                    <p:commandButton icon="fa fa-upload"    disabled="#{dataMB.isLogin==false}" >
+                        <p:ajax event="click" listener="#{refFileMB.setData(data)}" oncomplete="PF('saveRefDialog').show()"/> 
+                    </p:commandButton>
+                    
+                    <p:commandButton icon="fa fa-download" ajax="false"  actionListener="#{refFileMB.putRefFile(data)}" disabled="#{data.attachment==null}">   
+                        <p:fileDownload value="#{refFileMB.refFile}"/>
+                    </p:commandButton>
+
+                </p:column>
+                <!-- delete column-->
+                <p:column headerText="" visible="#{dataMB.isLogin==true}" exportable="false" style="width:40px">
+                    <p:commandButton  icon="fa fa-remove">
+                        <p:ajax event="click" listener="#{dataMB.setSelect(data)}" oncomplete="PF('delDialog').show()" /> 
+                    </p:commandButton>
+                </p:column>
+
+                <p:rowExpansion id="expandedText">
+                    <p:dataTable id="historyDatas"  var="historyData" value="#{data.historyDataList}" style="width:400px"  paginator="true" rows="10">
+
+                        <p:column>
+                            <f:facet name="header">
+                                <h:outputText value="Modified Value"/>
+                            </f:facet>
+                            <h:outputText value="#{historyData.value}"/>               
+                        </p:column>
+
+                        <p:column>
+                            <f:facet name="header">
+                                <h:outputText value="Modified Date"/>
+                            </f:facet>
+                            <h:outputText value="#{historyData.dateModified}"> 
+                                <f:convertDateTime timeZone="GMT+8" pattern="yyyy/MM/dd" locale="zh"/>
+                            </h:outputText>
+                        </p:column>
+
+                    </p:dataTable>
+                </p:rowExpansion>    
+
+            </p:dataTable>
+        </h:form>
+
+        <p:dialog header="Leader Login" widgetVar="logDialog" modal="true">
+            <h:form id="logForm">
+                <p:messages id="msgs" autoUpdate="true"/>
+
+                <h:panelGrid columns="2" cellpadding="10" id="loglPanel">
+
+                    <p:outputLabel for="name_input" value="Name:"  />
+                    <h:inputText id="name_input" value="#{dataMB.leader.name}" required="true"/>                   
+                    <p:outputLabel for="password_input" value="Password:" />
+                    <p:password id="password_input" value="#{dataMB.leader.password}" required="true"/>                 
+                    <p:commandButton value="commit" actionListener="#{dataMB.validate}" update=":paraForm:datas,logForm"  />                                
+                    <p:commandButton value="close" onclick="PF('logDialog').hide()"/>
+                </h:panelGrid>
+            </h:form>
+        </p:dialog> 
+
+        <p:dialog header="Add a New Record" widgetVar="addDialog" modal="true" width="1000" height="300">
+            <h:form id="addForm">
+                <h:panelGrid columns="4" cellpadding="10" id="addPanel">
+                    <p:outputLabel value="SubDivision:" />
+                    <p:selectOneMenu value="#{dataMB.subdivision}" converter="subdivisionConverter" filter="true" filterMatchMode="startsWith" required="true" >       
+                        <f:selectItems  value="#{subdivisionMB.subdivisionList}" var="selectsubdivision" itemLabel="#{selectsubdivision.name}" itemValue="#{selectsubdivision}" />   
+                        <f:ajax listener="#{dataMB.changeSubdivison}" render="systems"/>
+                    </p:selectOneMenu>
+
+                    <p:outputLabel value="System:" />
+                    <p:selectOneMenu  id="systems" value="#{dataMB.select.systemId}" converter="systemConverter" filter="true" filterMatchMode="startsWith" required="true">                        
+                        <f:selectItems  value="#{dataMB.subdivision.systemList}" var="selectsystem" itemLabel="#{selectsystem.name}" itemValue="#{selectsystem}" />                                           
+                    </p:selectOneMenu>
+         
+                    <p:outputLabel  for="pamameter_input" value="Parameter Name:" />
+                    <p:inputText  id="pamameter_input" value="#{dataMB.select.parameterid.name}"  required="true"/>
+
+                    <p:outputLabel for="attribute_input" value="Attribute(nominal,min,or max):" />
+                    <p:inputText id="attribute_input" value="#{dataMB.select.attributeid.name}" required="true" />
+
+                    <p:outputLabel for="unit_input" value="Unit" />
+                    <p:inputText id="unit_input" value="#{dataMB.select.parameterid.unitid.name}" required="true"  />
+
+                    <p:outputLabel for="value_input" value="Value" />
+                    <p:inputText id="value_input" value="#{dataMB.select.value}" required="true" />
+
+                    <p:outputLabel value="Comment" />
+                    <p:inputText value="#{dataMB.select.comment}" />
+
+                    <p:outputLabel value="Definition" />
+                    <p:inputText value="#{dataMB.select.parameterid.definition}" />
+
+
+                    <p:outputLabel value="Reference Title:" />
+                    <p:inputText value="#{dataMB.select.parameterid.referenceid.title}" />
+
+                    <p:outputLabel value="Reference Author:" />
+                    <p:inputText value="#{dataMB.select.parameterid.referenceid.author}" />
+
+                    <p:outputLabel value="Reference Publication:" />
+                    <p:inputText value="#{dataMB.select.parameterid.referenceid.publication}" />
+
+                    <p:outputLabel value="Reference URL:" />
+                    <p:inputText value="#{dataMB.select.parameterid.referenceid.url}" />
+
+                    <p:commandButton value="commit"  actionListener="#{dataMB.add}" update=":paraForm:datas,addForm"/>
+                    <!--   <p:commandButton value="commit" oncomplete="PF('addDialog').hide()" actionListener="" update=":paraForm:datas"/>-->
+
+                </h:panelGrid>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog header="Are you sure to delete the record?" widgetVar="delDialog" modal="true">
+            <h:form id="delForm">
+                <p:messages  id="delMsg" autoUpdate="true"/>
+                <h:panelGrid columns="3" cellpadding="15" id="delPanel">
+                    <f:facet name="delFacet">
+                        <p:outputLabel value="Are you sure?"/>
+                    </f:facet>
+                    <p:commandButton value="YES" actionListener="#{dataMB.delete}" update=":paraForm:datas,delForm"  styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                    <p:commandButton value="NO" type="button" onclick="PF('delDialog').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close"  />
+                    <p:commandButton value="CLOSE" type="button" onclick="PF('delDialog').hide()" styleClass="ui-confirmdialog-no" icon="ui-icon-close"  />
+
+                </h:panelGrid>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog header="Upload an Image" widgetVar="uploadImageDialog" modal="true" >
+            <h:form id="uploadImageForm">
+                <h:panelGrid cellpadding="10" columns="1" >  
+                    <h:outputLabel value="Choose an Image:" style="font-size: 24px;color:royalblue"/>            
+                    <p:fileUpload  fileUploadListener="#{dataMB.uploadImage}"   mode="advanced" 
+                                   invalidFileMessage="Please upload files of gif、jpe、jpg、png."
+                                   allowTypes="/(\.|\/)(gif|jpe?g|png)$/" 
+                                   sizeLimit="1060000" invalidSizeMessage="The image must be less than 1M"
+                                   style="text-align: center; width: 600px; height: 100px; " />
+                </h:panelGrid>
+            </h:form>
+        </p:dialog>
+
+        <p:dialog header="View the Image" widgetVar="viewImageDialog" modal="true"  width="600" height="300">
+            <h:form id="viewImageForm" >
+                <p:graphicImage value="#{valueImageMB.image}" id="images">
+                  <!--  <f:param name="dataId" value="#{dataMB.select.id}"/>-->
+                </p:graphicImage>
+            </h:form>
+        </p:dialog>
+
+
+        <p:dialog header="Save the Reference File" widgetVar="saveRefDialog" modal="true"  width="600" height="300">
+            <h:form id="saveRefForm">
+                <p:messages  id="saveRefMsg" autoUpdate="true"/>
+                <p:commandButton value="YES"   disabled="#{refFileMB.sign}" actionListener="#{refFileMB.confirmUpload()}"   update=":saveRefForm" styleClass="ui-confirmdialog-yes" icon="ui-icon-check" />
+                <p:commandButton value="NO" disabled="#{refFileMB.sign}"    actionListener="#{refFileMB.setSign(true)}"    update=":saveRefForm" styleClass="ui-confirmdialog-no" icon="ui-icon-close"  />
+                <!--onclick="PF('saveRefDialog').hide()" type="button"-->
+                <h:panelGrid cellpadding="10" columns="1" >  
+                    <h:outputLabel value="Choose a File:" style="font-size: 24px;color:royalblue"/>            
+                    <p:fileUpload  fileUploadListener="#{refFileMB.uploadRefFile}"   mode="advanced" 
+                                   style="text-align: center; width: 600px; height: 100px; "  update=":saveRefForm" />
+                </h:panelGrid>
+            </h:form>
+    </p:dialog>
+
+
+    </h:body>
+
+
+
+</html>
+
